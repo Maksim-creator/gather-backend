@@ -20,7 +20,9 @@ export class AuthService {
   }
 
   async login(body: { email: string; password: string }) {
-    const user = await this.usersService.findByEmail(body.email);
+    const { password, ...user } = await this.usersService.findByEmail(
+      body.email,
+    );
     if (!user) {
       throw new ConflictException('Invalid credentials');
     }
@@ -35,7 +37,8 @@ export class AuthService {
 
     const payload = { username: user.email, sub: user.id };
     return {
-      access_token: this.jwtService.sign(payload),
+      accessToken: this.jwtService.sign(payload),
+      user,
     };
   }
 
