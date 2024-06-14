@@ -1,6 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 // import * as smtpTransport from 'nodemailer-smtp-transport';
+// const smtpTransport = require('nodemailer-smtp-transport');
 
 @Injectable()
 export class EmailService {
@@ -11,17 +12,17 @@ export class EmailService {
       service: 'gmail',
       host: 'smtp.gmail.com',
       port: 465,
-      secure: true,
+      secure: false,
       auth: {
-        user: process.env.EMAIL_LOGIN,
-        pass: process.env.EMAIL_PASS,
+        user: 'reekolect.m@gmail.com',
+        pass: 'uebr cyzy pyjc rcop',
       },
     });
   }
 
   async sendVerificationCode(email: string, code: string) {
     const mailOptions = {
-      from: 'gather.enterprise.co@gmail.com',
+      from: process.env.EMAIL_LOGIN,
       to: email,
       subject: 'Your Verification Code',
       text: `Your verification code is: ${code}`,
