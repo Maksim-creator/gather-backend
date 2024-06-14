@@ -39,6 +39,10 @@ export class UsersService {
     return this.userRepository.findOne({ where: { email } });
   }
 
+  async findById(id: string) {
+    return await this.userRepository.findOne({ where: { id } });
+  }
+
   async validateUser(email: string, pass: string): Promise<User | null> {
     const user = await this.findByEmail(email);
     if (user && (await bcrypt.compare(pass, user.password))) {
