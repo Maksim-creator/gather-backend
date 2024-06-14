@@ -1,4 +1,5 @@
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
+import { VerificationCode } from '../auth/verification-code.entity';
 
 export const typeOrmConfig: TypeOrmModuleOptions = {
   type: 'postgres',
@@ -8,7 +9,7 @@ export const typeOrmConfig: TypeOrmModuleOptions = {
   password: 'root',
   url: 'postgres://default:cKv39CHabUif@ep-broad-credit-a2k4y7e7.eu-central-1.aws.neon.tech:5432/verceldb?sslmode=require',
   database: 'gather',
-  entities: [__dirname + '/../**/*.entity.{js,ts}'],
+  entities: [__dirname + '/../**/*.entity.{js,ts}', VerificationCode],
   synchronize: true, // Set to false in production
   autoLoadEntities: true,
   ssl: {

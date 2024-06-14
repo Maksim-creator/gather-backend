@@ -8,11 +8,6 @@ import { BadRequestException } from '@nestjs/common';
 export class AuthController {
   constructor(private authService: AuthService) {}
 
-  @Get()
-  async lal() {
-    return 'LALA';
-  }
-
   @UseGuards(LocalAuthGuard)
   @Post('login')
   async login(@Body() body: { email: string; password: string }) {
@@ -24,6 +19,21 @@ export class AuthController {
     if (createUserDto.password !== createUserDto.repeatPassword) {
       throw new BadRequestException('Passwords do not match');
     }
-    return this.authService.signUp(createUserDto);
+    return this.authService.signUp({ ...createUserDto, verified: false });
+  }
+
+  @Post('send-verification-email')
+  async sendVerificationEmail(@Body('email') email: string) {
+    await this.authService.sendVerificationEmail(email);
+  }
+
+  @Post('verify-code')
+  async verifyCode(@Body('email') email: string, @Body('code') code: string) {
+    const isValid = await this.authService.verifyCode(email, code);
+    if (!isValid) {
+      throw new BadRequestException('Invalid verification code');
+    } else {
+      return { verified: isValid };
+    }
   }
 }

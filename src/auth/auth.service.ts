@@ -1,12 +1,20 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
+import { generateVerificationCode } from './utils';
+import { EmailService } from '../email/email.service';
+import { VerificationCode } from './verification-code.entity';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
     private usersService: UsersService,
     private jwtService: JwtService,
+    private emailService: EmailService,
+    @InjectRepository(VerificationCode)
+    private verificationCodeRepository: Repository<VerificationCode>,
   ) {}
 
   async validateUser(email: string, pass: string): Promise<any> {
@@ -24,7 +32,7 @@ export class AuthService {
       body.email,
     );
     if (!user) {
-      throw new ConflictException('Invalid credentials');
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
 
     const isPasswordValid = await this.usersService.validateUser(
@@ -32,7 +40,7 @@ export class AuthService {
       body.password,
     );
     if (!isPasswordValid) {
-      throw new ConflictException('Invalid credentials');
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
     }
 
     const payload = { username: user.email, sub: user.id };
@@ -47,5 +55,27 @@ export class AuthService {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = newUser;
     return result;
+  }
+
+  async sendVerificationEmail(email: string) {
+    const code = generateVerificationCode();
+    const verificationCode = this.verificationCodeRepository.create({
+      email,
+      code,
+    });
+    await this.verificationCodeRepository.save(verificationCode);
+    await this.emailService.sendVerificationCode(email, code);
+  }
+
+  async verifyCode(email: string, code: string): Promise<boolean> {
+    const verificationCode = await this.verificationCodeRepository.findOne({
+      where: { email, code },
+    });
+    if (verificationCode) {
+      await this.usersService.verifyUser(email);
+      await this.verificationCodeRepository.remove(verificationCode);
+      return true;
+    }
+    return false;
   }
 }

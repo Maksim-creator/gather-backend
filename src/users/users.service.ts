@@ -1,8 +1,10 @@
-// src/users/users.service.ts
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User } from './user.entity';
 import * as bcrypt from 'bcrypt';
-import { v4 as uuidv4 } from 'uuid';
 
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -43,5 +45,14 @@ export class UsersService {
       return user;
     }
     return null;
+  }
+
+  async verifyUser(email: string) {
+    const user = await this.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException();
+    }
+
+    await this.userRepository.update({ email }, { verified: true });
   }
 }

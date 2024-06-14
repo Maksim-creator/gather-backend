@@ -18,6 +18,9 @@ export class User {
   @Column()
   password: string;
 
+  @Column({ default: false })
+  verified: boolean;
+
   @BeforeInsert()
   generateId() {
     this.id = uuidv4();
