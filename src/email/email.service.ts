@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
@@ -26,6 +26,10 @@ export class EmailService {
       text: `Your verification code is: ${code}`,
     };
 
-    return await this.transporter.sendMail(mailOptions);
+    try {
+      return await this.transporter.sendMail(mailOptions);
+    } catch (e) {
+      throw new BadRequestException(e);
+    }
   }
 }

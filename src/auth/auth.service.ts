@@ -28,6 +28,7 @@ export class AuthService {
   }
 
   async login(body: { email: string; password: string }) {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...user } = await this.usersService.findByEmail(
       body.email,
     );
@@ -64,7 +65,7 @@ export class AuthService {
       code,
     });
     await this.verificationCodeRepository.save(verificationCode);
-    // await this.emailService.sendVerificationCode(email, code);
+    await this.emailService.sendVerificationCode(email, code);
   }
 
   async verifyCode(email: string, code: string): Promise<boolean> {
