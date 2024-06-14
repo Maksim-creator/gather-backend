@@ -1,21 +1,24 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import * as smtpTransport from 'nodemailer-smtp-transport';
 
 @Injectable()
 export class EmailService {
   private transporter;
 
   constructor() {
-    this.transporter = nodemailer.createTransport({
-      service: 'gmail',
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.EMAIL_LOGIN,
-        pass: process.env.EMAIL_PASS,
-      },
-    });
+    this.transporter = nodemailer.createTransport(
+      smtpTransport({
+        service: 'gmail',
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth: {
+          user: process.env.EMAIL_LOGIN,
+          pass: process.env.EMAIL_PASS,
+        },
+      }),
+    );
   }
 
   async sendVerificationCode(email: string, code: string) {
