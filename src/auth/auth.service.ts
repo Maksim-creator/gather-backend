@@ -55,7 +55,8 @@ export class AuthService {
     const newUser = await this.usersService.create(user);
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password, ...result } = newUser;
-    const payload = { username: result.email, sub: result.id };
+    const payload = { email: result.email, sub: result.id };
+    await this.sendVerificationEmail(result.email);
     return {
       accessToken: this.jwtService.sign(payload),
       user: result,
@@ -76,6 +77,7 @@ export class AuthService {
     const verificationCode = await this.verificationCodeRepository.findOne({
       where: { email, code },
     });
+
     if (verificationCode) {
       await this.usersService.verifyUser(email);
       await this.verificationCodeRepository.remove(verificationCode);
